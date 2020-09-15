@@ -46,18 +46,25 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "nrf.h"
-#include "nordic_common.h"
 #include "boards.h"
+#include "nordic_common.h"
+#include "nrf.h"
+#include "nrf_ble_scan.h"
+#include "nrf_error.h"
+#include "nrf_sdh.h"
+#include "nrf_sdh_ble.h"
+#include "nrf_sdh_soc.h"
+#include "sdk_common.h"
 
-/**
- * @brief Function for application main entry.
- */
-int main(void)
-{
-    while (true)
-    {
-        // Do nothing.
-    }
+nrf_ble_scan_t m_scan;
+
+static void scan_init(void) {
+  APP_ERROR_CHECK(nrf_ble_scan_init(&m_scan, NULL, NULL));
+}
+
+int main(void) {
+  while (true) {
+    // Do nothing.
+  }
 }
 /** @} */
