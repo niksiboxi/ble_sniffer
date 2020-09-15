@@ -51,6 +51,9 @@
 #include "nrf.h"
 #include "nrf_ble_scan.h"
 #include "nrf_error.h"
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "nrf_log_default_backends.h"
 #include "nrf_sdh.h"
 #include "nrf_sdh_ble.h"
 #include "nrf_sdh_soc.h"
@@ -58,11 +61,26 @@
 
 nrf_ble_scan_t m_scan;
 
+static void log_init(void) {
+  APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
+
+  NRF_LOG_DEFAULT_BACKENDS_INIT();
+}
+
 static void scan_init(void) {
   APP_ERROR_CHECK(nrf_ble_scan_init(&m_scan, NULL, NULL));
 }
 
+static void scan_start(void) {
+  APP_ERROR_CHECK(nrf_ble_scan_start(&m_scan));
+}
+
 int main(void) {
+  log_init();
+  NRF_LOG_INFO("Hello World!");
+  //scan_init();
+  //scan_start();
+
   while (true) {
     // Do nothing.
   }
