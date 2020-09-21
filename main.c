@@ -64,11 +64,20 @@
 
 nrf_ble_scan_t m_scan;
 
-static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
-{
+static void ble_evt_handler(ble_evt_t const *p_ble_evt, void *p_context) {
   UNUSED_PARAMETER(p_context);
 
-  ble_gap_evt_t const * p_gap_evt = &p_ble_evt->evt.gap_evt;
+  ble_gap_evt_t const *p_gap_evt = &p_ble_evt->evt.gap_evt;
+
+  switch (p_ble_evt->header.evt_id) {
+  case BLE_GAP_EVT_ADV_REPORT:
+    NRF_LOG_INFO("BLE Device Found!");
+    nrf_ble_scan_start(&m_scan);
+    break;
+
+  default:
+    break;
+  }
 }
 
 static void log_init(void) {
@@ -77,8 +86,7 @@ static void log_init(void) {
   NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
 
-static void ble_stack_init(void)
-{
+static void ble_stack_init(void) {
   APP_ERROR_CHECK(nrf_sdh_enable_request());
 
   uint32_t ram_start = 0;
@@ -102,6 +110,8 @@ int main(void) {
   ble_stack_init();
   scan_init();
   scan_start();
+
+  NRF_LOG_INFO("Initialization... Done");
 
   while (true) {
     // Do nothing.
