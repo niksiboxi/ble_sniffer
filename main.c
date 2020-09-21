@@ -67,6 +67,16 @@ static void log_init(void) {
   NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
 
+static void ble_stack_init(void)
+{
+  APP_ERROR_CHECK(nrf_sdh_enable_request());
+
+  if(!nrf_sdh_is_enabled())
+  {
+      NRF_LOG_INFO("Softdevice is not enabled");
+  }
+}
+
 static void scan_init(void) {
   APP_ERROR_CHECK(nrf_ble_scan_init(&m_scan, NULL, NULL));
 }
@@ -77,9 +87,9 @@ static void scan_start(void) {
 
 int main(void) {
   log_init();
-  NRF_LOG_INFO("Hello World!");
-  //scan_init();
-  //scan_start();
+  ble_stack_init();
+  scan_init();
+  scan_start();
 
   while (true) {
     // Do nothing.
