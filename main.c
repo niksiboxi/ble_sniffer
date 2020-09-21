@@ -59,7 +59,17 @@
 #include "nrf_sdh_soc.h"
 #include "sdk_common.h"
 
+#define APP_BLE_CONN_CFG_TAG 1
+#define APP_BLE_OBSERVER_PRIO 3
+
 nrf_ble_scan_t m_scan;
+
+static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
+{
+  UNUSED_PARAMETER(p_context);
+
+  ble_gap_evt_t const * p_gap_evt = &p_ble_evt->evt.gap_evt;
+}
 
 static void log_init(void) {
   APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
@@ -71,10 +81,12 @@ static void ble_stack_init(void)
 {
   APP_ERROR_CHECK(nrf_sdh_enable_request());
 
-  if(!nrf_sdh_is_enabled())
-  {
-      NRF_LOG_INFO("Softdevice is not enabled");
-  }
+  uint32_t ram_start = 0;
+  APP_ERROR_CHECK(nrf_sdh_ble_default_cfg_set(APP_BLE_CONN_CFG_TAG, &ram_start));
+
+  APP_ERROR_CHECK(nrf_sdh_ble_enable(&ram_start));
+
+  NRF_SDH_BLE_OBSERVER(m_ble_observer, APP_BLE_OBSERVER_PRIO, ble_evt_handler, NULL);
 }
 
 static void scan_init(void) {
