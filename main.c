@@ -62,7 +62,9 @@
 #define APP_BLE_CONN_CFG_TAG 1
 #define APP_BLE_OBSERVER_PRIO 3
 
-nrf_ble_scan_t m_scan;
+nrf_ble_scan_t m_scan;  // Scan Module instance
+
+static void scan_start(void);
 
 static void ble_evt_handler(ble_evt_t const *p_ble_evt, void *p_context) {
   UNUSED_PARAMETER(p_context);
@@ -70,15 +72,31 @@ static void ble_evt_handler(ble_evt_t const *p_ble_evt, void *p_context) {
   ble_gap_evt_t const *p_gap_evt = &p_ble_evt->evt.gap_evt;
 
   switch (p_ble_evt->header.evt_id) {
-  case BLE_GAP_EVT_ADV_REPORT:
-    NRF_LOG_INFO("BLE Device Found!");
-    nrf_ble_scan_start(&m_scan);
+  case BLE_GAP_EVT_ADV_REPORT:  // Advertising report
+    NRF_LOG_INFO("BLE Device Found! RSSI: %d", p_gap_evt->params.adv_report.rssi);
+    scan_start();
     break;
 
   default:
     break;
   }
 }
+
+static void scan_evt_handler(scan_evt_t const * p_scan_evt)
+{
+  switch(p_scan_evt->scan_evt_id){
+    case NRF_BLE_SCAN_EVT_NOT_FOUND:
+      NRF_LOG_INFO("NRF_BLE_SCAN_EVT_NOT_FOUND");
+      break;
+
+    case NRF_BLE_SCAN_EVT_SCAN_TIMEOUT:
+      NRF_LOG_INFO("NRF_BLE_SCAN_EVT_SCAN_TIMEOUT");
+      break;
+
+    default:
+      break;
+  }
+} 
 
 static void log_init(void) {
   APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
@@ -98,6 +116,25 @@ static void ble_stack_init(void) {
 }
 
 static void scan_init(void) {
+  static ble_gap_scan_params_t m_scan_param;
+  nrf_ble_scan_init_t m_scan_init;
+
+  memset(&m_scan_init, 0, sizeof(m_scan_init));
+
+  m_scan_param.active = 0x01;
+  m_scan_param.interval = BLE_GAP_SCAN_INTERVAL_MIN;
+  m_scan_param.window = BLE_GAP_SCAN_WINDOW_MIN;
+  m_scan_param.timeout = BLE_GAP_SCAN_TIMEOUT_UNLIMITED;
+
+  //m_scan_init.connect_if_match = false;
+  //m_scan_init.p_scan_param = &m_scan_param;
+  //m_scan_init.conn_cfg_tag = APP_BLE_CONN_CFG_TAG;
+
+  m_scan.scan_params = m_scan_param;
+  m_scan.connect_if_match = false;
+  m_scan.evt_handler = scan_evt_handler;
+
+  //APP_ERROR_CHECK(nrf_ble_scan_init(&m_scan, &m_scan_init, scan_evt_handler));
   APP_ERROR_CHECK(nrf_ble_scan_init(&m_scan, NULL, NULL));
 }
 
